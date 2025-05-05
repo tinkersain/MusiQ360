@@ -1,11 +1,11 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
-const connectDB = require("./utils/db");
 const userRouter = require("./routes/userRoutes");
 const songRouter = require("./routes/songRoutes");
 const playlistRouter = require("./routes/playlistRoutes");
 const cors = require("cors");
+const connectDB = require("./utils/db");
 
 const app = express();
 
@@ -15,11 +15,12 @@ app.use(
   cors({
     methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS",
     optionsSuccessStatus: 200,
-    origin: "http://localhost:5173",
+    origin: process.env.PUBLIC_URL || "http://localhost:5173",
     credentials: true,
   })
 );
-app.options("*", cors());
+// Updated to have a named parameter instead of just "*"
+app.options("/*path", cors());
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 

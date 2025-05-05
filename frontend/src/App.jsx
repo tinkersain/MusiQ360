@@ -1,21 +1,26 @@
-import { useEffect, useState } from "react";
+import "./App.css";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import MainLayout from "./layout/Mainlayout";
 import axios from "axios";
-import { Box, Text } from "@chakra-ui/react";
+import Auth from "./pages/Auth/Auth";
+import { AuthProvider } from "./context/AuthContext";
+axios.defaults.baseURL = "http://localhost:8080";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <MainLayout />, // Wrap the layout with the Navbar and Footer
+    children: [{ path: "/", element: <Auth /> }],
+  },
+]);
 
 function App() {
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000")
-      .then((res) => setMessage(res.data))
-      .catch((err) => console.error(err));
-  }, []);
-
   return (
-    <Box p={5}>
-      <Text fontSize="xl">{message}</Text>
-    </Box>
+    <>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </>
   );
 }
 

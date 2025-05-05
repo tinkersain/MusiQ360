@@ -12,7 +12,7 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 
 // User Profile Routes
-router.get("/profile/:id", getUserProfile);
-router.put("/profile/:id", updateUserProfile);
+router.get("/profile", getUserProfile);
+router.put("/profile", updateUserProfile);
 
 module.exports = router;

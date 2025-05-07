@@ -9,12 +9,40 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("eventToken"));
   const [currentSongData, setCurrentSongData] = useState();
   const [songList, setSongList] = useState([]);
+  const [userDetails, setUserDetails] = useState();
+  const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
-  function login(data) {
+  function refreshUserDetails() {
+    if (!token || !name) return;
+
+    return axios
+      .get("/api/users/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setUserDetails(res.data);
+      })
+      .catch((err) => console.error("Failed to refresh user:", err));
+  }
+
+  async function login(data) {
     setName(data.name);
     setToken(data.token);
     localStorage.setItem("name", data.name);
     localStorage.setItem("eventToken", data.token);
+
+    try {
+      const res = await axios.get("/api/users/profile", {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      });
+      setUserDetails(res.data);
+    } catch (err) {
+      console.error("Failed to fetch user profile during login:", err);
+    }
   }
 
   function logout() {
@@ -24,12 +52,26 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("eventToken");
   }
 
-  async function refreshCurrentSong(id) {
+  async function refreshCurrentSong(id, autoPlay = false) {
     try {
       const res = await axios.get(`/api/songs/${id}`);
       const song = res.data;
       const poster = await FetchSongPosterUrl(song.title);
-      setCurrentSongData({ ...song, poster });
+
+      let isFavourite = false;
+      if (
+        userDetails &&
+        userDetails.favourites &&
+        userDetails.favourites.includes(id)
+      ) {
+        isFavourite = true;
+      }
+
+      setCurrentSongData({ ...song, poster, isFavourite });
+
+      if (autoPlay) {
+        setShouldAutoPlay(true);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -42,10 +84,15 @@ export const AuthProvider = ({ children }) => {
         token,
         currentSongData,
         songList,
+        userDetails,
+        shouldAutoPlay,
         login,
         logout,
         refreshCurrentSong,
         setSongList,
+        setCurrentSongData,
+        refreshUserDetails,
+        setShouldAutoPlay,
       }}
     >
       {children}

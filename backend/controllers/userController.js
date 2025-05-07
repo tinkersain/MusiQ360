@@ -7,7 +7,6 @@ const {
   generateToken,
   decodeToken
 } = require("../utils/common");
-const connectDB = require("../utils/db");
 
 // Register new user
 const registerUser = async (req, res) => {
@@ -80,7 +79,7 @@ const loginUser = async (req, res) => {
 const getUserProfile = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
-    const userId = decodeToken(token);
+    const userId = decodeToken(token).id;
     if (userId) {
       const user = await User.findById(userId).select("-_id -password -createdAt -updatedAt");
       res.status(200).json(user);
@@ -94,18 +93,83 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+// Get user Favourites
+const getUserFavourites = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Authorization header missing or invalid."
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = decodeToken(token);
+    const userId = decoded.id;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: constants.invalidAuthentication
+      });
+    }
+
+    const user = await User.findById(userId)
+      .select("favourites")
+      .populate("favourites");
+    if (!user) {
+      return res.status(404).json({
+        message: constants.userNotFound
+      });
+    }
+
+    res.status(200).json({
+      favourites: user.favourites
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message || "Internal server error",
+    });
+  }
+};
+
+
 // Update user profile
 const updateUserProfile = async (req, res) => {
   try {
     const {
       name,
-      email
+      email,
+      password
     } = req.body;
-    const user = await User.findById(req.params.id);
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Authorization header missing or invalid."
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = decodeToken(token);
+    const userId = decoded.id;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: constants.invalidAuthentication
+      });
+    }
+
+    const user = await User.findOne({
+      _id: userId
+    });
 
     if (user) {
       user.name = name || user.name;
       user.email = email || user.email;
+      if (password) {
+        user.password = await bcrypt.hash(password, constants.hashedPasswordSaltLength);
+      }
       const updatedUser = await user.save();
       res.json(updatedUser);
     } else {
@@ -126,4 +190,5 @@ module.exports = {
   loginUser,
   getUserProfile,
   updateUserProfile,
+  getUserFavourites,
 };

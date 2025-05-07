@@ -10,8 +10,7 @@ const {
 // Create a new playlist
 const createPlaylist = async (req, res) => {
     const {
-        name,
-        songs
+        name
     } = req.body; // Assuming songs is an array of song IDs
     const token = req.headers.authorization.split(" ")[1];
 
@@ -22,7 +21,7 @@ const createPlaylist = async (req, res) => {
         const playlist = await Playlist.create({
             name,
             user: userId, // Use decoded user ID
-            songs,
+            songs: [],
         });
         res.status(201).json(playlist);
     } catch (error) {

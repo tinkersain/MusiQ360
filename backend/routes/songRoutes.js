@@ -6,6 +6,7 @@ const {
   getSongById,
   deleteSong,
   updateSong,
+  addToFavourites,
 } = require("../controllers/songController");
 
 // Song Routes
@@ -14,5 +15,6 @@ router.get("/", getAllSongs);
 router.get("/:id", getSongById);
 router.put("/:id", updateSong);
 router.delete("/:id", deleteSong);
+router.post("/addToFavourites", addToFavourites);
 
 module.exports = router;

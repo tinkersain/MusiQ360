@@ -1,4 +1,8 @@
 const Song = require("../models/songModel");
+const User = require("../models/userModel");
+const {
+  decodeToken
+} = require("../utils/common");
 
 // Upload a song (admin)
 const uploadSong = async (req, res) => {
@@ -78,6 +82,43 @@ const deleteSong = async (req, res) => {
   }
 };
 
+const addToFavourites = async (req, res) => {
+  const {
+    id,
+    isDelete
+  } = req.body;
+
+  const token = req.headers.authorization.split(" ")[1];
+  const userId = decodeToken(token).id;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) return res.status(404).json({
+      message: "User not found"
+    });
+
+    if (isDelete) {
+      user.favourites = user.favourites.filter(songId => songId.toString() != id);
+    } else {
+      if (!user.favourites.includes(id)) {
+        user.favourites.push(id);
+      }
+    }
+
+    await user.save();
+    console.log(user);
+    res.status(200).json({
+      favourites: user.favourites
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+      error: err.message
+    });
+  }
+};
+
 // Export all functions
 module.exports = {
   uploadSong,
@@ -85,4 +126,5 @@ module.exports = {
   getSongById,
   updateSong,
   deleteSong,
+  addToFavourites
 };

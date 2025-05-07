@@ -7,6 +7,8 @@ import { AuthProvider } from "./context/AuthContext";
 import MainLayout from "./layout/Mainlayout";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import { useEffect } from "react";
+import Likes from "./pages/Likes/Likes";
+import Playlist from "./pages/Playlist/Playlist";
 axios.defaults.baseURL = "http://localhost:8080";
 
 const router = createBrowserRouter([
@@ -14,6 +16,16 @@ const router = createBrowserRouter([
     path: "/",
     element: <MainLayout />,
     children: [{ path: "/", element: <Dashboard /> }],
+  },
+  {
+    path: "/",
+    element: <MainLayout />,
+    children: [{ path: "/likes", element: <Likes /> }],
+  },
+  {
+    path: "/",
+    element: <MainLayout />,
+    children: [{ path: "/playlist", element: <Playlist /> }],
   },
   {
     path: "/",

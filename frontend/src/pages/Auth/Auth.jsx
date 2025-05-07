@@ -90,8 +90,8 @@ const Auth = () => {
         setLoading(true);
         await axios
           .post("/api/users/login", loginDetails)
-          .then((res) => {
-            login(res.data);
+          .then(async (res) => {
+            await login(res.data);
             notification.success("Login Successfull !", "");
             setLoading(false);
             setLoginDetails({ email: "", password: "" });

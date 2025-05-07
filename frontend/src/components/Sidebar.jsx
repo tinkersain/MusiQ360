@@ -124,7 +124,7 @@ const NavItem = ({ icon, children, ...rest }) => {
 };
 
 const MobileNav = ({ onOpen }) => {
-  const { logout, name, userDetails, refreshUserDetails, token } = useAuth();
+  const { logout, userDetails, refreshUserDetails, token } = useAuth();
   const {
     isOpen: isModalOpen,
     onOpen: openModal,

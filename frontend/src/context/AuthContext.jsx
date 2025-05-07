@@ -12,6 +12,23 @@ export const AuthProvider = ({ children }) => {
   const [userDetails, setUserDetails] = useState();
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
+  useEffect(() => {
+    async function fetchCurrentUserDetails() {
+      try {
+        const res = await axios.get("/api/users/profile", {
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+          },
+        });
+        setUserDetails(res.data);
+      } catch (err) {
+        console.error("Failed to fetch user profile during login:", err);
+      }
+    }
+
+    if (name && token) fetchCurrentUserDetails();
+  }, []);
+
   function refreshUserDetails() {
     if (!token || !name) return;
 

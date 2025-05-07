@@ -19,9 +19,6 @@ const songSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  searchKeywords: [{
-    type: String,
-  }]
 }, {
   timestamps: true,
 });

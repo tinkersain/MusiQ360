@@ -3,11 +3,15 @@ import "./Auth.css";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { Button, Text } from "@chakra-ui/react";
+import { useNotification } from "../../utils/useNotification";
 
 const Auth = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const notification = useNotification();
   const [isSignUpActive, setIsSignUpActive] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [userDetails, setUserDetails] = useState({
     name: "",
     mobile: "",
@@ -42,7 +46,10 @@ const Auth = () => {
 
     // Show alert if errors exist
     if (errors.length > 0) {
-      alert("Please fix the following errors:\n\n" + errors.join("\n"));
+      notification.error(
+        "Please fix the following errors:\n\n",
+        errors.join("\n\n")
+      );
       return false;
     }
 
@@ -53,35 +60,56 @@ const Auth = () => {
     e.preventDefault();
     if (isSignUpActive) {
       if (validateUserDetails(userDetails)) {
-        console.log(userDetails);
+        setLoading(true);
         await axios
           .post("/api/users/register", userDetails)
           .then(() => {
-            alert("User Successfully Registered !");
+            notification.success("Success !", "User Successfully Registered !");
+            setLoading(false);
+            setUserDetails({
+              name: "",
+              mobile: "",
+              email: "",
+              sic: "",
+              password: "",
+            });
             setIsSignUpActive(false);
           })
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            setLoading(false);
+            notification.error("Error !", err.message);
+          });
       }
     } else {
       if (
         loginDetails.password.length === 0 ||
         loginDetails.email.length === 0
       ) {
-        alert("Please fill valid email and password !");
+        notification.error("Error !", "Please fill valid email and password !");
       } else {
+        setLoading(true);
         await axios
           .post("/api/users/login", loginDetails)
           .then((res) => {
             login(res.data);
+            notification.success("Login Successfull !", "");
+            setLoading(false);
+            setLoginDetails({ email: "", password: "" });
             navigate("/");
           })
-          .catch((err) => alert(err.response.data.message));
+          .catch(() => {
+            setLoading(false);
+            notification.error("Something went wrong !", "Invalid Credentials");
+          });
       }
     }
   };
 
   return (
-    <div id="auth">
+    <div id="auth" style={{ background: "#ffd762" }}>
+      <Text color="tomato" style={{ fontSize: "40px", fontWeight: "bold" }}>
+        MusiQ 360
+      </Text>
       <div
         className={`container ${isSignUpActive ? "right-panel-active" : ""}`}
       >
@@ -91,6 +119,7 @@ const Auth = () => {
             <input
               type="text"
               placeholder="Name"
+              value={userDetails.name}
               onChange={(e) =>
                 setUserDetails((prev) => ({ ...prev, name: e.target.value }))
               }
@@ -98,6 +127,7 @@ const Auth = () => {
             <input
               type="number"
               placeholder="Mobile Number"
+              value={userDetails.mobile}
               onChange={(e) =>
                 setUserDetails((prev) => ({ ...prev, mobile: e.target.value }))
               }
@@ -105,6 +135,7 @@ const Auth = () => {
             <input
               type="email"
               placeholder="Email"
+              value={userDetails.email}
               onChange={(e) =>
                 setUserDetails((prev) => ({ ...prev, email: e.target.value }))
               }
@@ -112,6 +143,7 @@ const Auth = () => {
             <input
               type="text"
               placeholder="SIC"
+              value={userDetails.sic}
               onChange={(e) =>
                 setUserDetails((prev) => ({ ...prev, sic: e.target.value }))
               }
@@ -119,6 +151,7 @@ const Auth = () => {
             <input
               type="password"
               placeholder="Password"
+              value={userDetails.password}
               onChange={(e) =>
                 setUserDetails((prev) => ({
                   ...prev,
@@ -126,7 +159,9 @@ const Auth = () => {
                 }))
               }
             />
-            <button type="submit">Sign Up</button>
+            <Button isLoading={loading} variant="solid" type="submit">
+              Sign up
+            </Button>
           </form>
         </div>
         <div className="form-container sign-in-container">
@@ -135,6 +170,7 @@ const Auth = () => {
             <input
               type="email"
               placeholder="Email"
+              value={loginDetails.email}
               onChange={(e) =>
                 setLoginDetails((prev) => ({ ...prev, email: e.target.value }))
               }
@@ -142,6 +178,7 @@ const Auth = () => {
             <input
               type="password"
               placeholder="Password"
+              value={loginDetails.password}
               onChange={(e) =>
                 setLoginDetails((prev) => ({
                   ...prev,
@@ -149,7 +186,9 @@ const Auth = () => {
                 }))
               }
             />
-            <button type="submit">Sign In</button>
+            <Button isLoading={loading} variant="solid" type="submit">
+              Login
+            </Button>
           </form>
         </div>
         <div className="overlay-container">

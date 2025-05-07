@@ -1,16 +1,24 @@
 import "./App.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import MainLayout from "./layout/Mainlayout";
+import AuthLayout from "./layout/Authlayout";
 import axios from "axios";
 import Auth from "./pages/Auth/Auth";
 import { AuthProvider } from "./context/AuthContext";
+import MainLayout from "./layout/Mainlayout";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import { useEffect } from "react";
 axios.defaults.baseURL = "http://localhost:8080";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />, // Wrap the layout with the Navbar and Footer
-    children: [{ path: "/", element: <Auth /> }],
+    element: <MainLayout />,
+    children: [{ path: "/", element: <Dashboard /> }],
+  },
+  {
+    path: "/",
+    element: <AuthLayout />,
+    children: [{ path: "/auth", element: <Auth /> }],
   },
 ]);
 

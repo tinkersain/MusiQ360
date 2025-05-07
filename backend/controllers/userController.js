@@ -7,6 +7,7 @@ const {
   generateToken,
   decodeToken
 } = require("../utils/common");
+const connectDB = require("../utils/db");
 
 // Register new user
 const registerUser = async (req, res) => {
@@ -21,13 +22,10 @@ const registerUser = async (req, res) => {
       email
     });
     if (userExists)
-      return res.status(400).json({
+      res.status(400).json({
         message: constants.userAlreadyExist
       });
-
     const hashedPassword = await bcrypt.hash(password, constants.hashedPasswordSaltLength);
-    console.log(hashedPassword);
-
     const user = await User.create({
       name,
       email,
